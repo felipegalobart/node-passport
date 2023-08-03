@@ -1,6 +1,6 @@
 import passport from "passport";
 import { BasicStrategy } from "passport-http";
-import { User, UserInstance } from "../models/User";
+import { User } from "../models/User";
 import { Request, Response, NextFunction } from "express";
 
 // Aqui configura a sua strategy
@@ -15,21 +15,15 @@ passport.use(new BasicStrategy(async (email, password, done) => {
     if(user){
       return done(null, user);
     }
-  }else {
-    return done(notAuthorizedJson, false);
   }
-  
+  return done(notAuthorizedJson, false);
 }));
 
 export const privateRoute = (req: Request, res: Response, next: NextFunction) => {
-  const authFunction = passport.authenticate('basic', (err: Error, user: UserInstance) => {
-    if(user){
-      next();
-    } else {
-      next(notAuthorizedJson);
-    }
-  });
-  authFunction(req, res, next);
+  const authFunction = passport.authenticate('basic', (err: any, user: any) => {
+    return user ? next() : next(notAuthorizedJson);
+  })(req, res, next);
+  
 }
 
 export default passport;
